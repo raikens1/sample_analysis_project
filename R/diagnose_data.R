@@ -14,7 +14,8 @@ diagnose_cross_sectional <- function(df, theta = c(-10, 20)){
 
   result <- df %>%
     mutate(p_diagnose = diagnosis_fn(severity, theta)) %>%
-    mutate(diagnosed = rbinom(n_row, size = 1, p = p_diagnose))
+    mutate(diagnosed = rbinom(n_row, size = 1, p = p_diagnose)) %>%
+    select(-p_diagnose)
 
   return(result)
 }

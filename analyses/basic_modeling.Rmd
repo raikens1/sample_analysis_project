@@ -1,0 +1,93 @@
+---
+title: "Basic Models"
+author: "Rachael Caelie (Rocky) Aikens"
+date: "6/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center")
+source("../R/generate_data.R")
+source("../R/diagnose_data.R")
+library(tidyverse)
+
+theme_set(theme_light())
+
+set.seed(123)
+n <- 50000
+```
+
+# A Simple Model with Diagnosis by Severity
+
+Suppose we want to do a study of a disease. Perhaps our target population is "all people," or perhaps it is some subset of people (e.g. only Men, only Asians, etc.). Each person, $i$, has an underlying (unobserved) disease state $Z_i$ and a disease severity $S_i$.  A simple model is:
+
+\begin{align*}
+    Z_i &\sim_{iid} \text{Bernoulli}(0.15)\\
+    S_i|Z_i = 1 &\sim_{iid} \text{Uniform}(0, 1)\\
+\end{align*}
+
+Where $S_i = 0$ whenever $Z_i = 0$. 
+
+Suppose additionally that a person's likelihood of diagnosis is a function of the severity of their illness, namely
+
+$$D_i \sim_{iid} \text{Bernoulli}\left(\phi(S_i\right))$$
+
+$\phi(S_i)$ could be many possible functions, here I use a sigmoid function:
+
+$$\phi(S_i) = \frac{1}{1 + exp(-(\beta_0 + \beta_1S_i))} - c$$
+Here, $c = \frac{1}{1 + exp(-\beta_0)}$ is a corrective constant to ensure that $\phi(0) = 0$. Let $\beta_1 = 20$ and $\beta_0 = -10$.  This gives the following probability of diagnosis as a function of severity:
+
+```{r plot diagnosis function, eval = FALSE, fig.height=3, fig.width=3}
+# Make a plot of diagnosis probability as a function of severity
+
+# vector of severity values
+S <- seq(0, 1, length.out = 100)
+
+# TODO:
+# Make a vector of diagnosis probabilities corresponding to severities in S
+# use theta = c(-10, 20)
+probs <- 
+
+# Make data frame and show plot
+plot_data <- tibble(S, probs)
+ggplot(data = plot_data, aes(x = S, y = probs)) +
+  geom_line() +
+  xlim(c(0,1)) +
+  ylim(c(0,1)) +
+  coord_fixed() +
+  ylab("P(Diagnosis | S)") +
+  xlab("Severity")
+```
+
+A few example rows sampled from the above distribution are printed below:
+
+```{r generate and diagnose data, eval = FALSE}
+# TODO:
+# Make a cross-sectional data set of 50000 people with diagnosis labels
+# use n = 50000, prevalence = 0.15, theta = c(-10, 20)
+df <- 
+
+# print first few rows to get an idea of the data
+df %>% head()
+```
+
+\pagebreak
+
+# Distortion in Observed Data
+
+This diagnosis process distorts the distribution of severities we observe.  The solid dark grey portion of the graph shows the individuals with the disease who were diagnosed, and the light grey portion shows individuals who were undiagnosed.
+
+```{r plot diagnosed data, eval = FALSE}
+diseased <- df %>% filter(disease == TRUE) %>%
+  mutate(group = "Individuals with Disease", alpha = 0.7)
+
+diagnosed <- df %>% filter(diagnosed == TRUE) %>%
+  mutate(group = "Individuals Diagnosed", alpha = 1)
+
+ggplot(rbind(diseased, diagnosed), aes(x = severity, group = group)) +
+  geom_histogram(aes(alpha = alpha), position = "identity") +
+  scale_alpha(range = c(0.4, 0.8)) +
+  theme(legend.position = "none") +
+  xlab("Severity") +
+  ylab("Number of individuals")
+```
