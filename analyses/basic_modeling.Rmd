@@ -6,9 +6,12 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center")
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE,
+                      message = FALSE, fig.align = "center")
+
 source("../R/generate_data.R")
 source("../R/diagnose_data.R")
+
 library(tidyverse)
 
 theme_set(theme_light())
@@ -79,10 +82,10 @@ This diagnosis process distorts the distribution of severities we observe.  The 
 
 ```{r plot diagnosed data, eval = FALSE}
 diseased <- df %>% filter(disease == TRUE) %>%
-  mutate(group = "Individuals with Disease", alpha = 0.7)
+  mutate(group = "Individuals with Disease", alpha = 0.4)
 
 diagnosed <- df %>% filter(diagnosed == TRUE) %>%
-  mutate(group = "Individuals Diagnosed", alpha = 1)
+  mutate(group = "Individuals Diagnosed", alpha = 0.8)
 
 ggplot(rbind(diseased, diagnosed), aes(x = severity, group = group)) +
   geom_histogram(aes(alpha = alpha), position = "identity") +
